@@ -21,7 +21,8 @@ function PizzaBlock({ title, price, imageUrl, sizes, types }) {
                     {types.map((type, i) => {
                         return (
                             // использую i для того чтобы по умолчанию добавить класс active первому элементу, поскольку значения "0" в массиве types может не быть
-                            <li onClick={() => setActiveType(i)}
+                            <li key={type}
+                                onClick={() => setActiveType(i)}
                                 className={i === activeType ? 'active' : ''}>
                                 {typeNames[type]}
                             </li>
@@ -31,7 +32,8 @@ function PizzaBlock({ title, price, imageUrl, sizes, types }) {
                 <ul>
                     {sizes.map((size, i) => {
                         return (
-                            <li onClick={() => setActiveSize(i)}
+                            <li key={size}
+                                onClick={() => setActiveSize(i)}
                                 className={i === activeSize ? 'active' : ''}>
                                 {size} см.
                             </li>
