@@ -15,10 +15,11 @@ const Main = () => {
                 setItems(json);
                 setIsLoading(false);
             })
+        window.scroll(0, 0)
     }, [])
 
     return (
-        <div>
+        <div className='container'>
             <div className="content__top">
                 <Categories/>
                 <Sort/>

@@ -18,6 +18,10 @@
 
     b {
       margin-right: 8px;
+
+      @media (max-width: 650px) {
+        display: none;
+      }
     }
 
     span {
