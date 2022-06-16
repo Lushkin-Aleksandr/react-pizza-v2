@@ -12,17 +12,16 @@ import NotFound from "./pages/NotFound";
 
 
 function App() {
-
-
+    const [searchValue, setSearchValue] = useState('');
 
 
     return (
         <div className="wrapper">
-            <Header/>
+            <Header searchValue={searchValue} setSearchValue={setSearchValue}/>
             <div className="content">
                 <div className="container">
                     <Routes>
-                        <Route path='/' element={<Main />} />
+                        <Route path='/' element={<Main searchValue={searchValue}/>} />
                         <Route path='/cart' element={<Cart/>}/>
                         <Route path='*' element={<NotFound/>}/>
                     </Routes>

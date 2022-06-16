@@ -3,8 +3,9 @@ import Categories from "../components/Categories";
 import Sort from "../components/Sort";
 import PizzaBlockLoader from "../components/PizzaBlock/PizzaBlockLoader";
 import PizzaBlock from "../components/PizzaBlock/PizzaBlock";
+import Pagination from "../Pagination/Pagination";
 
-const Main = () => {
+const Main = ({searchValue}) => {
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [categoryIndex, setCategoryIndex] = useState(0);
@@ -12,23 +13,29 @@ const Main = () => {
         name: 'популярности (desc)',
         sortProperty: 'rating'
     });
+    const [currentPage, setCurrentPage] = useState(1);
 
+
+    const loaders = new Array(10).fill(<PizzaBlockLoader/>);
+    const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
 
 
     useEffect(() => {
         const category = categoryIndex ? `&category=${categoryIndex}` : '';
         const sort = sortType.sortProperty.replace('-', '');
         const order = sortType.sortProperty.includes('-') ? 'asc' : 'desc';
+        const search = searchValue ? `&search=${searchValue}` : '';
+        const page = `&page=${currentPage}&limit=4`
 
         setIsLoading(true);
-        fetch(`https://62a23032cc8c0118ef5e8d7c.mockapi.io/items?sortBy=${sort}&order=${order}${category}`)
+        fetch(`https://62a23032cc8c0118ef5e8d7c.mockapi.io/items?sortBy=${sort}&order=${order}${category}${search}${page}`)
             .then((response) => response.json())
             .then(json => {
                 setItems(json);
                 setIsLoading(false);
             })
         window.scroll(0, 0)
-    }, [categoryIndex, sortType])
+    }, [categoryIndex, sortType, searchValue, currentPage])
 
     return (
         <div className='container'>
@@ -38,15 +45,11 @@ const Main = () => {
             </div>
             <h2 className="content__title">Все пиццы</h2>
             <div className="content__items">
-                {isLoading
-                    ? new Array(10).fill(<PizzaBlockLoader/>)
-                    : items.map((obj) => {
-                        return <PizzaBlock key={obj.id} {...obj} />
-                    })}
-
+                {isLoading ? loaders : pizzas}
             </div>
+            <Pagination currentPage={currentPage} setCurrentPage={setCurrentPage}/>
         </div>
-    );
+    )
 };
 
 export default Main;
