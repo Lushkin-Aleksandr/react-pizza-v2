@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Categories from "../components/Categories";
 import Sort from "../components/Sort";
 import PizzaBlockLoader from "../components/PizzaBlock/PizzaBlockLoader";
 import PizzaBlock from "../components/PizzaBlock/PizzaBlock";
 import Pagination from "../Pagination/Pagination";
+import {SearchContext} from "../App";
 
-const Main = ({searchValue}) => {
+const Main = () => {
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [categoryIndex, setCategoryIndex] = useState(0);
@@ -14,6 +15,7 @@ const Main = ({searchValue}) => {
         sortProperty: 'rating'
     });
     const [currentPage, setCurrentPage] = useState(1);
+    const {searchValue} = useContext(SearchContext);
 
 
     const loaders = new Array(10).fill(<PizzaBlockLoader/>);

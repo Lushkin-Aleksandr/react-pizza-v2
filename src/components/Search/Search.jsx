@@ -1,7 +1,11 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import styles from './Search.module.scss'
+import {SearchContext} from "../../App";
 
-const Search = ({searchValue, setSearchValue}) => {
+const Search = () => {
+    const {searchValue, setSearchValue} = useContext(SearchContext);
+
+
     return (
         <div className={styles.root}>
             <svg className={styles.icon} enable-background="new 0 0 32 32" id="Editable-line" version="1.1"
