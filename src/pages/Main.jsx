@@ -18,7 +18,7 @@ const Main = () => {
     const {searchValue} = useContext(SearchContext);
 
 
-    const loaders = new Array(10).fill(<PizzaBlockLoader/>);
+    const loaders = new Array(4).fill(<PizzaBlockLoader/>);
     const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
 
 
