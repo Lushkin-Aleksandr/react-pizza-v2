@@ -1,24 +1,27 @@
 import React, {useState} from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setSort } from "redux/slices/filterSlice";
 
-function Sort({value, onChangeSortType}) {
+
+const sortItems = [
+    {name: 'популярности (desc)', sortProperty: 'rating'},
+    {name: 'популярности (asc)', sortProperty: '-rating'},
+    {name: 'цене (desc)', sortProperty: 'price'},
+    {name: 'цене (asc)', sortProperty: '-price'},
+    {name: 'алфавиту (desc)', sortProperty: 'title'},
+    {name: 'алфавиту (asc)', sortProperty: '-title'},
+];
+
+
+function Sort() {
 
     const [popupDisplayed, setPopupDisplayed] = useState(false);
-
-
-    const sortItems = [
-        {name: 'популярности (desc)', sortProperty: 'rating'},
-        {name: 'популярности (asc)', sortProperty: '-rating'},
-        {name: 'цене (desc)', sortProperty: 'price'},
-        {name: 'цене (asc)', sortProperty: '-price'},
-        {name: 'алфавиту (desc)', sortProperty: 'title'},
-        {name: 'алфавиту (asc)', sortProperty: '-title'},
-    ];
-
-
+    const sortType = useSelector(state => state.filter.sort)
+    const dispatch = useDispatch();
 
 
     const chooseSortItem = (sortItem) => {
-        onChangeSortType(sortItem);
+        dispatch(setSort(sortItem))
         setPopupDisplayed(false);
     }
 
@@ -40,7 +43,7 @@ function Sort({value, onChangeSortType}) {
                     />
                 </svg>
                 <b>Сортировка по:</b>
-                <span>{value.name}</span>
+                <span>{sortType.name}</span>
             </div>
             {popupDisplayed && <div className="sort__popup">
                 <ul>
@@ -48,7 +51,7 @@ function Sort({value, onChangeSortType}) {
                         return <li
                             onClick={() => chooseSortItem(sortItem)}
                             key={sortItem.name}
-                            className={value.name === sortItem.name ? 'active' : ''}>
+                            className={sortType.name === sortItem.name ? 'active' : ''}>
                             {sortItem.name}
                         </li>;
                     } )}
