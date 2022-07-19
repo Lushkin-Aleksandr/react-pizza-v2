@@ -1,17 +1,23 @@
 import React, {useContext, useEffect, useState} from 'react';
 import Categories from "../components/Categories";
-import Sort from "../components/Sort";
+import Sort, { sortItems } from "../components/Sort";
 import PizzaBlockLoader from "../components/PizzaBlock/PizzaBlockLoader";
 import PizzaBlock from "../components/PizzaBlock/PizzaBlock";
 import Pagination from "../Pagination/Pagination";
 import {SearchContext} from "../App";
 import { useDispatch, useSelector } from 'react-redux';
-import { setCategoryId } from 'redux/slices/filterSlice';
+import { setCategoryId, setFilters } from 'redux/slices/filterSlice';
 import axios from 'axios';
+import qs from 'qs';
+import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 
 const Main = () => {
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
+    const isSearch = useRef(false)
+    const isMounted = useRef(false)
     
     const dispatch = useDispatch();
     const categoryId = useSelector(state => state.filter.categoryId)
@@ -19,15 +25,13 @@ const Main = () => {
     
     const currentPage = useSelector(state => state.filter.currentPage)
 
-    // const [currentPage, setCurrentPage] = useState(1);
     const { searchValue } = useContext(SearchContext);
 
 
     const loaders = new Array(4).fill(<PizzaBlockLoader/>);
     const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
 
-
-    useEffect(() => {
+    const fetchPizzas = () => {
         const category = categoryId ? `&category=${categoryId}` : '';
         const sort = sortType.replace('-', '');
         const order = sortType.includes('-') ? 'asc' : 'desc';
@@ -41,11 +45,52 @@ const Main = () => {
                 setItems(res.data);
                 setIsLoading(false);
             })
+    }
 
-
+    //Парсинг строки поиска
+    useEffect(() => {
+        if (window.location.search) {
+            const params = qs.parse(window.location.search.substring(1));
+            const sortObj = sortItems.find((elem) => elem.sortProperty === params.sortType)
+            
+            dispatch(setFilters({
+                ...params,
+                sort: sortObj
+            }));
+            
+            isSearch.current = true;
+        }
         
+    }, [])
+
+    //Отправка запроса за пиццами
+    useEffect(() => {        
         window.scroll(0, 0)
+
+        if (!isSearch.current) {
+            fetchPizzas();
+        }
+
+        isSearch.current = false;
+
     }, [categoryId, sortType, searchValue, currentPage])
+
+    //Формирование строки поиска из выбранных фильтров
+    useEffect(() => {
+        if (isMounted.current) {
+            const queryString = qs.stringify({
+                categoryId,
+                sortType,
+                currentPage
+            });
+    
+            navigate('?' + queryString);
+        }
+
+        isMounted.current = true;
+    }, [categoryId, sortType, currentPage]);
+
+    
 
 
 
