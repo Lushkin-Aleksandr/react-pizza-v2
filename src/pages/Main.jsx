@@ -15,6 +15,7 @@ import { useRef } from 'react';
 const Main = () => {
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [needRerender, setNeedRerender] = useState(false);
     const navigate = useNavigate();
     const isSearch = useRef(false)
     const isMounted = useRef(false)
@@ -28,9 +29,7 @@ const Main = () => {
     const { searchValue } = useContext(SearchContext);
 
 
-    const loaders = new Array(4).fill(<PizzaBlockLoader/>);
-    const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
-
+    // Запрос на получение пицц
     const fetchPizzas = () => {
         const category = categoryId ? `&category=${categoryId}` : '';
         const sort = sortType.replace('-', '');
@@ -47,35 +46,31 @@ const Main = () => {
             })
     }
 
-    //Парсинг строки поиска
+    // Парсинг строки поиска
     useEffect(() => {
         if (window.location.search) {
             const params = qs.parse(window.location.search.substring(1));
             const sortObj = sortItems.find((elem) => elem.sortProperty === params.sortType)
             
+            
+            if (+params.categoryId === categoryId &&
+                params.sortType === sortType &&
+                +params.currentPage === currentPage) {
+                    setNeedRerender(true);
+                }
+
             dispatch(setFilters({
                 ...params,
                 sort: sortObj
             }));
-            
+
             isSearch.current = true;
+            
         }
         
     }, [])
 
-    //Отправка запроса за пиццами
-    useEffect(() => {        
-        window.scroll(0, 0)
-
-        if (!isSearch.current) {
-            fetchPizzas();
-        }
-
-        isSearch.current = false;
-
-    }, [categoryId, sortType, searchValue, currentPage])
-
-    //Формирование строки поиска из выбранных фильтров
+    // Формирование строки поиска из выбранных фильтров
     useEffect(() => {
         if (isMounted.current) {
             const queryString = qs.stringify({
@@ -90,8 +85,23 @@ const Main = () => {
         isMounted.current = true;
     }, [categoryId, sortType, currentPage]);
 
-    
+    // Отправка запроса за пиццами
+    useEffect(() => {        
+        window.scroll(0, 0)
 
+        if (!isSearch.current) {
+            fetchPizzas();
+        }
+
+        isSearch.current = false;
+
+    }, [categoryId, sortType, searchValue, currentPage, needRerender])
+
+    
+    // Массив пицц-скелетонов
+    const loaders = new Array(4).fill(null).map((item, i) => <PizzaBlockLoader key={i}/>);
+    // Массив реальных пицц    
+    const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
 
 
     return (

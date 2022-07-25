@@ -8,7 +8,7 @@ const initialState = {
         name: 'популярности (desc)',
         sortProperty: 'rating'
     },
-    currentPage: 1
+    currentPage: 1,
 }
 
 export const filterSlice = createSlice({
@@ -28,7 +28,8 @@ export const filterSlice = createSlice({
             state.categoryId = Number(action.payload.categoryId);
             state.sort = action.payload.sort;
             state.currentPage = Number(action.payload.currentPage);
-        }
+        },
+        
     },
 })
 

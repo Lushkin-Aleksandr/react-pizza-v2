@@ -1,4 +1,5 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setSort } from "redux/slices/filterSlice";
 
@@ -18,6 +19,7 @@ function Sort() {
     const [popupDisplayed, setPopupDisplayed] = useState(false);
     const sortType = useSelector(state => state.filter.sort)
     const dispatch = useDispatch();
+    const sortRef = useRef();
 
 
     const chooseSortItem = (sortItem) => {
@@ -25,9 +27,23 @@ function Sort() {
         setPopupDisplayed(false);
     }
 
+    useEffect(() => {
+        const handleClickOutside = event => {
+            if (!event.path.includes(sortRef.current)) {
+                setPopupDisplayed(false)
+            }
+        }
+
+        document.body.addEventListener('click', handleClickOutside);
+
+        return () => {
+            document.body.removeEventListener('click', handleClickOutside);
+        }
+    }, [])
+
 
     return (
-        <div className="sort">
+        <div className="sort" ref={sortRef}>
             <div onClick={() => setPopupDisplayed(!popupDisplayed)} className="sort__label">
                 <svg
                     className={popupDisplayed ? 'arrowOpen' : ''}
