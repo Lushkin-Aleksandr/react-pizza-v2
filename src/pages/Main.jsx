@@ -1,49 +1,49 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Categories from "../components/Categories";
 import Sort, { sortItems } from "../components/Sort";
 import PizzaBlockLoader from "../components/PizzaBlock/PizzaBlockLoader";
 import PizzaBlock from "../components/PizzaBlock/PizzaBlock";
 import Pagination from "../Pagination/Pagination";
-import {SearchContext} from "../App";
+import { SearchContext } from "../App";
 import { useDispatch, useSelector } from 'react-redux';
 import { setCategoryId, setFilters } from 'redux/slices/filterSlice';
-import axios from 'axios';
 import qs from 'qs';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
+import { fetchPizzas, setItems } from 'redux/slices/pizzaSlice';
 
 const Main = () => {
-    const [items, setItems] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+
     const [needRerender, setNeedRerender] = useState(false);
     const navigate = useNavigate();
     const isSearch = useRef(false)
     const isMounted = useRef(false)
-    
+
     const dispatch = useDispatch();
+    const { items, status } = useSelector(state => state.pizza);
     const categoryId = useSelector(state => state.filter.categoryId)
     const sortType = useSelector(state => state.filter.sort.sortProperty)
-    
     const currentPage = useSelector(state => state.filter.currentPage)
 
     const { searchValue } = useContext(SearchContext);
 
 
     // Запрос на получение пицц
-    const fetchPizzas = () => {
+    const getPizzas = async () => {
         const category = categoryId ? `&category=${categoryId}` : '';
         const sort = sortType.replace('-', '');
         const order = sortType.includes('-') ? 'asc' : 'desc';
         const search = searchValue ? `&search=${searchValue}` : '';
         const page = `&page=${currentPage}&limit=4`
 
-        
-        setIsLoading(true);
-        axios.get(`https://62a23032cc8c0118ef5e8d7c.mockapi.io/items?sortBy=${sort}&order=${order}${category}${search}${page}`)
-            .then(res => {
-                setItems(res.data);
-                setIsLoading(false);
-            })
+
+        dispatch(fetchPizzas({
+            sort,
+            order,
+            category,
+            search,
+            page
+        }))
     }
 
     // Парсинг строки поиска
@@ -51,13 +51,13 @@ const Main = () => {
         if (window.location.search) {
             const params = qs.parse(window.location.search.substring(1));
             const sortObj = sortItems.find((elem) => elem.sortProperty === params.sortType)
-            
-            
+
+
             if (+params.categoryId === categoryId &&
                 params.sortType === sortType &&
                 +params.currentPage === currentPage) {
-                    setNeedRerender(true);
-                }
+                setNeedRerender(true);
+            }
 
             dispatch(setFilters({
                 ...params,
@@ -65,9 +65,9 @@ const Main = () => {
             }));
 
             isSearch.current = true;
-            
+
         }
-        
+
     }, [])
 
     // Формирование строки поиска из выбранных фильтров
@@ -78,7 +78,7 @@ const Main = () => {
                 sortType,
                 currentPage
             });
-    
+
             navigate('?' + queryString);
         }
 
@@ -86,20 +86,20 @@ const Main = () => {
     }, [categoryId, sortType, currentPage]);
 
     // Отправка запроса за пиццами
-    useEffect(() => {        
+    useEffect(() => {
         window.scroll(0, 0)
 
         if (!isSearch.current) {
-            fetchPizzas();
+            getPizzas();
         }
 
         isSearch.current = false;
 
     }, [categoryId, sortType, searchValue, currentPage, needRerender])
 
-    
+
     // Массив пицц-скелетонов
-    const loaders = new Array(4).fill(null).map((item, i) => <PizzaBlockLoader key={i}/>);
+    const loaders = new Array(4).fill(null).map((item, i) => <PizzaBlockLoader key={i} />);
     // Массив реальных пицц    
     const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
 
@@ -107,14 +107,26 @@ const Main = () => {
     return (
         <div className='container'>
             <div className="content__top">
-                <Categories value={categoryId} onChangeCategory={(i) => dispatch(setCategoryId(i))}/>
-                <Sort/>
+                <Categories value={categoryId} onChangeCategory={(i) => dispatch(setCategoryId(i))} />
+                <Sort />
             </div>
             <h2 className="content__title">Все пиццы</h2>
-            <div className="content__items">
-                {isLoading ? loaders : pizzas}
-            </div>
-            <Pagination currentPage={currentPage}/>
+            {status === 'error'
+                ? <div className='content__error'>
+                    <h2>
+                        Произошла ошибка <icon>😕</icon>
+                    </h2>
+                    <p>
+                        Не удалось получить пиццы...
+                    </p>
+                </div>
+                : <div className="content__items">
+                    {status === 'loading' ? loaders : pizzas}
+                </div>
+            }
+
+
+            <Pagination currentPage={currentPage} />
         </div>
     )
 };
