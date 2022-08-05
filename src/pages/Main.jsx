@@ -4,13 +4,12 @@ import Sort, { sortItems } from "../components/Sort";
 import PizzaBlockLoader from "../components/PizzaBlock/PizzaBlockLoader";
 import PizzaBlock from "../components/PizzaBlock/PizzaBlock";
 import Pagination from "../Pagination/Pagination";
-import { SearchContext } from "../App";
 import { useDispatch, useSelector } from 'react-redux';
-import { setCategoryId, setFilters } from 'redux/slices/filterSlice';
+import { selectFilter, setCategoryId, setFilters } from 'redux/slices/filterSlice';
 import qs from 'qs';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
-import { fetchPizzas, setItems } from 'redux/slices/pizzaSlice';
+import { fetchPizzas, selectPizzaData, setItems } from 'redux/slices/pizzaSlice';
 
 const Main = () => {
 
@@ -20,12 +19,10 @@ const Main = () => {
     const isMounted = useRef(false)
 
     const dispatch = useDispatch();
-    const { items, status } = useSelector(state => state.pizza);
-    const categoryId = useSelector(state => state.filter.categoryId)
-    const sortType = useSelector(state => state.filter.sort.sortProperty)
-    const currentPage = useSelector(state => state.filter.currentPage)
+    const { items, status } = useSelector(selectPizzaData);
+    const {categoryId, sort: {sortProperty: sortType}, currentPage, searchValue} = useSelector(selectFilter);
 
-    const { searchValue } = useContext(SearchContext);
+    
 
 
     // Запрос на получение пицц

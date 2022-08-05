@@ -1,7 +1,7 @@
 import React, {useRef, useState} from "react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setSort } from "redux/slices/filterSlice";
+import { selectFilterSort, setSort } from "redux/slices/filterSlice";
 
 
 export const sortItems = [
@@ -17,7 +17,7 @@ export const sortItems = [
 function Sort() {
 
     const [popupDisplayed, setPopupDisplayed] = useState(false);
-    const sortType = useSelector(state => state.filter.sort)
+    const sortType = useSelector(selectFilterSort)
     const dispatch = useDispatch();
     const sortRef = useRef();
 
